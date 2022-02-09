@@ -85,7 +85,7 @@ def main():
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(400, 10, 2, resolution)
+    nodes = generateNodes(50, 10, 2, resolution)
 
     route, distance, name = selection(algorithm, nodes)
     text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
