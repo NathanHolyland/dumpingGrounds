@@ -1,6 +1,7 @@
 from math import *
 from random import randrange
 from tkinter import *
+import time
 import pygame
 
 
@@ -33,13 +34,21 @@ def drawScreen(nodeList, surface):
         node.draw(surface)
 
 
-def drawRoute(route, surface):
+def drawRoute(route, colour, slow, surface):
     points = []
     for node in route:
         coordinates = [node.x, node.y]
         points.append(coordinates)
-    print(points)
-    pygame.draw.lines(surface, (200, 200, 200), True, points, 2)
+    if slow:
+        for i in range(len(points)-1):
+            pygame.draw.line(surface, colour, points[i], points[i+1], 2)
+            time.sleep(0.05)
+            pygame.display.flip()
+        pygame.draw.line(surface, colour, points[-1], points[0], 2)
+        time.sleep(0.05)
+        pygame.display.flip()
+    else:
+        pygame.draw.lines(surface, colour, True, points, 2)
 
 
 def greedySearch(nodeList):
@@ -76,19 +85,25 @@ def main():
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(10, 10, 2, resolution)
+    nodes = generateNodes(400, 10, 2, resolution)
 
     route, distance, name = selection(algorithm, nodes)
     text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
     text2 = font.render(("Algorithm Used: "+name), True, (255, 255, 255))
 
     running = True
+
+    #first draw
+    screen.fill((0, 0, 0))
+    drawScreen(nodes, screen)
+    drawRoute(route, [200, 50, 50], True, screen)
+    pygame.display.flip()
     while running:
         screen.fill((0, 0, 0))
         drawScreen(nodes, screen)
-        drawRoute(route, screen)
+        drawRoute(route, [200, 50, 50], False, screen)
         screen.blit(text1,(0,0))
-        screen.blit(text2,(0,20))
+        screen.blit(text2,(0,resolution[1]*0.03))
         pygame.display.flip()
 
         for event in pygame.event.get():
