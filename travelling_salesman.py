@@ -33,16 +33,62 @@ def drawScreen(nodeList, surface):
         node.draw(surface)
 
 
+def drawRoute(route, surface):
+    points = []
+    for node in route:
+        coordinates = [node.x, node.y]
+        points.append(coordinates)
+    print(points)
+    pygame.draw.lines(surface, (200, 200, 200), True, points, 2)
+
+
+def greedySearch(nodeList):
+    nodes_to_visit = nodeList.copy()
+    route = [nodeList[0]]
+    distance = 0
+    current_node = nodeList[0]
+    nodes_to_visit.remove(current_node)
+    while len(nodes_to_visit) != 0:
+        shortest_path = nodes_to_visit[0]
+        for node in nodes_to_visit:
+            if current_node.distTo(node) < current_node.distTo(shortest_path):
+                shortest_path = node
+        distance += current_node.distTo(shortest_path)
+        nodes_to_visit.remove(shortest_path)
+        route.append(shortest_path)
+    return route, distance
+
+def selection(algorithm, nodes):
+    name = "Invalid Input"
+    if algorithm == "G":
+        name = "Greedy Search"
+        route, distance = greedySearch(nodes)
+        return route, distance, name
+            
+            
 def main():
+    print("Which Algorithm Should Be Used \n G | Greedy Search")
+    algorithm = input()
     root = Tk()
     resolution = [root.winfo_screenwidth(), root.winfo_screenheight()]
     screen = pygame.display.set_mode(resolution)
-    nodes = generateNodes(10, 5, 0, resolution)
+    pygame.display.set_caption("Travelling Salesman Problem")
+    pygame.font.init()
+    font = pygame.font.SysFont('Comic Sans MS', 30)
+
+    nodes = generateNodes(10, 10, 2, resolution)
+
+    route, distance, name = selection(algorithm, nodes)
+    text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
+    text2 = font.render(("Algorithm Used: "+name), True, (255, 255, 255))
 
     running = True
     while running:
         screen.fill((0, 0, 0))
         drawScreen(nodes, screen)
+        drawRoute(route, screen)
+        screen.blit(text1,(0,0))
+        screen.blit(text2,(0,20))
         pygame.display.flip()
 
         for event in pygame.event.get():
