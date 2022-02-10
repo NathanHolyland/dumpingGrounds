@@ -1,6 +1,10 @@
 from math import *
 from random import randrange
+from re import A
+from select import select
 from tkinter import *
+from numpy import Infinity
+import random
 import time
 import pygame
 
@@ -65,7 +69,50 @@ def greedySearch(nodeList):
         distance += current_node.distTo(shortest_path)
         nodes_to_visit.remove(shortest_path)
         route.append(shortest_path)
+        current_node = shortest_path
     return route, distance
+    
+
+def antOptimise(nodeList, iterations, dstBias, pheromoneBias, decay):
+    pheromoneTrails = {}
+    for start in nodeList:
+        pheromoneTrails[start] = {}
+        for end in nodeList:
+            if start == end:
+                continue
+            pheromoneTrails[start][end] = 1
+
+    bestRoute = [None, Infinity]
+
+    for i in range(iterations):
+        for dictionary in pheromoneTrails:
+            for element in pheromoneTrails[dictionary]:
+                pheromoneTrails[dictionary][element] *= 1-decay
+        for i in range(4):
+            unvisited = nodeList.copy()
+            distance = 0
+            current = nodeList[random.randint(0,len(nodeList)-1)]
+            route = [current]
+            unvisited.remove(current)
+            while len(unvisited) != 0:
+                selection = []
+                weights = []
+                for node in unvisited:
+                    dst = current.distTo(node)
+                    desirability = 1/(dst**dstBias) * (pheromoneTrails[current][node]**pheromoneBias)
+                    selection.append(node)
+                    weights.append(desirability)
+                choice = random.choices(selection, weights=weights, k=1)[0]
+                distance += current.distTo(choice)
+                route.append(choice)
+                unvisited.remove(choice)
+                current = choice
+            pheromoneStrength = 10000/distance
+            for i in range(len(route)-1):
+                pheromoneTrails[route[i]][route[i+1]] += pheromoneStrength
+            if distance < bestRoute[1]:
+                bestRoute = [route, distance]
+    return bestRoute[0], bestRoute[1]
 
 def selection(algorithm, nodes):
     name = "Invalid Input"
@@ -73,11 +120,17 @@ def selection(algorithm, nodes):
         name = "Greedy Search"
         route, distance = greedySearch(nodes)
         return route, distance, name
+    if algorithm == "A":
+        name = "Ant Optimisation"
+        route, distance = antOptimise(nodes, 25, 3, 2, 0.1)
+        return route, distance, name
             
             
 def main():
-    print("Which Algorithm Should Be Used \n G | Greedy Search")
+    print("Which Algorithm Should Be Used \n G | Greedy Search \n A | Ant Optimise")
     algorithm = input()
+    print("Should the route draw instantly? Y | N")
+    slow = input()
     root = Tk()
     resolution = [root.winfo_screenwidth(), root.winfo_screenheight()]
     screen = pygame.display.set_mode(resolution)
@@ -85,7 +138,8 @@ def main():
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(50, 10, 2, resolution)
+    nodes = generateNodes(20, 10, 2, resolution)
+    #antOptimise(nodes, 5)
 
     route, distance, name = selection(algorithm, nodes)
     text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
@@ -94,14 +148,15 @@ def main():
     running = True
 
     #first draw
-    screen.fill((0, 0, 0))
-    drawScreen(nodes, screen)
-    drawRoute(route, [200, 50, 50], True, screen)
-    pygame.display.flip()
-    while running:
+    if slow == "N":
         screen.fill((0, 0, 0))
         drawScreen(nodes, screen)
+        drawRoute(route, [200, 50, 50], True, screen)
+        pygame.display.flip()
+    while running:
+        screen.fill((0, 0, 0))
         drawRoute(route, [200, 50, 50], False, screen)
+        drawScreen(nodes, screen)
         screen.blit(text1,(0,0))
         screen.blit(text2,(0,resolution[1]*0.03))
         pygame.display.flip()
