@@ -73,7 +73,7 @@ def greedySearch(nodeList):
     return route, distance
     
 
-def antOptimise(nodeList, iterations, dstBias, pheromoneBias, decay):
+def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, numAnts):
     pheromoneTrails = {}
     for start in nodeList:
         pheromoneTrails[start] = {}
@@ -88,7 +88,7 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneBias, decay):
         for dictionary in pheromoneTrails:
             for element in pheromoneTrails[dictionary]:
                 pheromoneTrails[dictionary][element] *= 1-decay
-        for i in range(4):
+        for i in range(numAnts):
             unvisited = nodeList.copy()
             distance = 0
             current = nodeList[random.randint(0,len(nodeList)-1)]
@@ -107,7 +107,7 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneBias, decay):
                 route.append(choice)
                 unvisited.remove(choice)
                 current = choice
-            pheromoneStrength = 10000/distance
+            pheromoneStrength = pheromoneIntensity/distance
             for i in range(len(route)-1):
                 pheromoneTrails[route[i]][route[i+1]] += pheromoneStrength
             if distance < bestRoute[1]:
@@ -122,11 +122,13 @@ def selection(algorithm, nodes):
         return route, distance, name
     if algorithm == "A":
         name = "Ant Optimisation"
-        route, distance = antOptimise(nodes, 25, 3, 2, 0.1)
+        # (Iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, antsPerGroup)
+        route, distance = antOptimise(nodes, 50, 3, 10, 2, 0.3, 20)
         return route, distance, name
             
             
 def main():
+    default = input()
     print("Which Algorithm Should Be Used \n G | Greedy Search \n A | Ant Optimise")
     algorithm = input()
     print("Should the route draw instantly? Y | N")
@@ -138,12 +140,23 @@ def main():
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(50, 10, 2, resolution)
+    nodes = generateNodes(100, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
+    start_time = time.time()
     route, distance, name = selection(algorithm, nodes)
+    end_time = time.time()
+    elapsed = round(end_time - start_time, 3)
+
+    start_time = time.time()
+    route2, distance2, name2 = selection("G", nodes)
+    end_time = time.time()
+    elapsed2 = round(end_time-start_time, 3)
+    print("How long it took greedy: "+str(elapsed2))
+    print("Greedy did it in "+str(distance2))
     text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
     text2 = font.render(("Algorithm Used: "+name), True, (255, 255, 255))
+    text3 = font.render(("Time Taken: "+str(elapsed)), True, (255, 255, 255))
 
     running = True
 
@@ -155,10 +168,12 @@ def main():
         pygame.display.flip()
     while running:
         screen.fill((0, 0, 0))
+        drawRoute(route2, [50, 50, 50], False, screen)
         drawRoute(route, [200, 50, 50], False, screen)
         drawScreen(nodes, screen)
         screen.blit(text1,(0,0))
         screen.blit(text2,(0,resolution[1]*0.03))
+        screen.blit(text3,(0,resolution[1]*0.06))
         pygame.display.flip()
 
         for event in pygame.event.get():
