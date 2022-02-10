@@ -138,7 +138,7 @@ def main():
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(20, 10, 2, resolution)
+    nodes = generateNodes(50, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     route, distance, name = selection(algorithm, nodes)
