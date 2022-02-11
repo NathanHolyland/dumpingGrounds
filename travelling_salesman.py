@@ -94,7 +94,7 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias
             current = nodeList[random.randint(0,len(nodeList)-1)]
             route = [current]
             unvisited.remove(current)
-            while len(unvisited) != 0:
+            for i in range(len(unvisited)):
                 selection = []
                 weights = []
                 for node in unvisited:
@@ -128,7 +128,6 @@ def selection(algorithm, nodes):
             
             
 def main():
-    default = input()
     print("Which Algorithm Should Be Used \n G | Greedy Search \n A | Ant Optimise")
     algorithm = input()
     print("Should the route draw instantly? Y | N")
@@ -140,20 +139,13 @@ def main():
     pygame.font.init()
     font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(100, 10, 2, resolution)
+    nodes = generateNodes(50, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     start_time = time.time()
     route, distance, name = selection(algorithm, nodes)
     end_time = time.time()
     elapsed = round(end_time - start_time, 3)
-
-    start_time = time.time()
-    route2, distance2, name2 = selection("G", nodes)
-    end_time = time.time()
-    elapsed2 = round(end_time-start_time, 3)
-    print("How long it took greedy: "+str(elapsed2))
-    print("Greedy did it in "+str(distance2))
     text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
     text2 = font.render(("Algorithm Used: "+name), True, (255, 255, 255))
     text3 = font.render(("Time Taken: "+str(elapsed)), True, (255, 255, 255))
@@ -168,7 +160,6 @@ def main():
         pygame.display.flip()
     while running:
         screen.fill((0, 0, 0))
-        drawRoute(route2, [50, 50, 50], False, screen)
         drawRoute(route, [200, 50, 50], False, screen)
         drawScreen(nodes, screen)
         screen.blit(text1,(0,0))
