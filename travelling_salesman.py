@@ -1,13 +1,15 @@
 from math import *
 from random import randrange
 from re import A
-from select import select
 from tkinter import *
+from turtle import Screen
 from numpy import Infinity
 import random
 import time
 import pygame
 
+pygame.font.init()
+font = pygame.font.SysFont('Comic Sans MS', 30)
 
 class Node:
     def __init__(self, x, y, r, w):
@@ -48,11 +50,8 @@ def drawRoute(route, colour, slow, surface):
             pygame.draw.line(surface, colour, points[i], points[i+1], 2)
             time.sleep(0.05)
             pygame.display.flip()
-        pygame.draw.line(surface, colour, points[-1], points[0], 2)
-        time.sleep(0.05)
-        pygame.display.flip()
     else:
-        pygame.draw.lines(surface, colour, True, points, 2)
+        pygame.draw.lines(surface, colour, False, points, 2)
 
 
 def greedySearch(nodeList):
@@ -73,7 +72,7 @@ def greedySearch(nodeList):
     return route, distance
     
 
-def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, numAnts):
+def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, numAnts, screen):
     pheromoneTrails = {}
     for start in nodeList:
         pheromoneTrails[start] = {}
@@ -112,9 +111,14 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias
                 pheromoneTrails[route[i]][route[i+1]] += pheromoneStrength
             if distance < bestRoute[1]:
                 bestRoute = [route, distance]
+                screen.fill((0,0,0))
+                drawRoute(bestRoute[0], (0, 0, 255), False, screen)
+                distanceText = font.render(("Distance: "+str(bestRoute[1])), True, (255, 255, 255))
+                screen.blit(distanceText,(0,0))
+                pygame.display.flip()
     return bestRoute[0], bestRoute[1]
 
-def selection(algorithm, nodes):
+def selection(algorithm, nodes, screen):
     name = "Invalid Input"
     if algorithm == "G":
         name = "Greedy Search"
@@ -123,7 +127,7 @@ def selection(algorithm, nodes):
     if algorithm == "A":
         name = "Ant Optimisation"
         # (Iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, antsPerGroup)
-        route, distance = antOptimise(nodes, 50, 3, 10, 2, 0.3, 20)
+        route, distance = antOptimise(nodes, 30, 3, 1, 1, 0.7, 100, screen)
         return route, distance, name
             
             
@@ -136,14 +140,14 @@ def main():
     resolution = [root.winfo_screenwidth(), root.winfo_screenheight()]
     screen = pygame.display.set_mode(resolution)
     pygame.display.set_caption("Travelling Salesman Problem")
-    pygame.font.init()
-    font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    nodes = generateNodes(50, 10, 2, resolution)
+
+
+    nodes = generateNodes(200, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     start_time = time.time()
-    route, distance, name = selection(algorithm, nodes)
+    route, distance, name = selection(algorithm, nodes, screen)
     end_time = time.time()
     elapsed = round(end_time - start_time, 3)
     text1 = font.render(("Total Distance: "+str(round(distance))), True, (255, 255, 255))
