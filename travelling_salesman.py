@@ -3,7 +3,7 @@ from random import randrange
 from re import A
 from tkinter import *
 from turtle import Screen
-from numpy import Infinity
+from numpy import Infinity, euler_gamma
 import random
 import time
 import pygame
@@ -53,6 +53,9 @@ def drawRoute(route, colour, slow, surface):
     else:
         pygame.draw.lines(surface, colour, False, points, 2)
 
+def sigmoid(x):
+    return (1/(1+(e**-x)))
+
 
 def greedySearch(nodeList):
     nodes_to_visit = nodeList.copy()
@@ -84,13 +87,20 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias
     bestRoute = [None, Infinity]
 
     for i in range(iterations):
+        screen.fill((0, 0, 0))
         for dictionary in pheromoneTrails:
             for element in pheromoneTrails[dictionary]:
                 pheromoneTrails[dictionary][element] *= 1-decay
+                if pheromoneTrails[dictionary][element]**2 >= 0.3:
+                    gamma = sigmoid(pheromoneTrails[dictionary][element]**2)
+                    colour = 80*gamma
+                    start_coord = [dictionary.x, dictionary.y]
+                    end_coord = [element.x, element.y]
+                    pygame.draw.line(screen, (0, colour, 0), start_coord, end_coord, 4)
         for i in range(numAnts):
             unvisited = nodeList.copy()
             distance = 0
-            current = nodeList[random.randint(0,len(nodeList)-1)]
+            current = nodeList[0]
             route = [current]
             unvisited.remove(current)
             for i in range(len(unvisited)):
@@ -107,15 +117,18 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias
                 unvisited.remove(choice)
                 current = choice
             pheromoneStrength = pheromoneIntensity/distance
+
             for i in range(len(route)-1):
                 pheromoneTrails[route[i]][route[i+1]] += pheromoneStrength
             if distance < bestRoute[1]:
                 bestRoute = [route, distance]
-                screen.fill((0,0,0))
-                drawRoute(bestRoute[0], (0, 0, 255), False, screen)
-                distanceText = font.render(("Distance: "+str(bestRoute[1])), True, (255, 255, 255))
-                screen.blit(distanceText,(0,0))
-                pygame.display.flip()
+
+            distanceText = font.render(("Distance: "+str(bestRoute[1])), False, (255, 255, 255))
+            drawRoute(route, (40, 0, 0), False, screen) 
+            drawRoute(bestRoute[0], (0, 0, 255), False, screen)
+            screen.blit(distanceText,(0,0))
+            pygame.display.flip()
+
     return bestRoute[0], bestRoute[1]
 
 def selection(algorithm, nodes, screen):
@@ -127,7 +140,7 @@ def selection(algorithm, nodes, screen):
     if algorithm == "A":
         name = "Ant Optimisation"
         # (Iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, antsPerGroup)
-        route, distance = antOptimise(nodes, 30, 3, 1, 1, 0.7, 100, screen)
+        route, distance = antOptimise(nodes, 50, 3, 10000, 1, 0.7, 50, screen)
         return route, distance, name
             
             
@@ -143,7 +156,7 @@ def main():
 
 
 
-    nodes = generateNodes(200, 10, 2, resolution)
+    nodes = generateNodes(50, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     start_time = time.time()
