@@ -140,7 +140,7 @@ def selection(algorithm, nodes, screen):
     if algorithm == "A":
         name = "Ant Optimisation"
         # (Iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, antsPerGroup)
-        route, distance = antOptimise(nodes, 50, 3, 10000, 1, 0.7, 50, screen)
+        route, distance = antOptimise(nodes, 20, 3, 10000, 1, 0.7, 100, screen)
         return route, distance, name
             
             
@@ -156,7 +156,7 @@ def main():
 
 
 
-    nodes = generateNodes(50, 10, 2, resolution)
+    nodes = generateNodes(100, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     start_time = time.time()
