@@ -38,4 +38,5 @@ vector<string> tokenize(vector<string> file) {
             }
         }
     }
+    return tokens;
 }
