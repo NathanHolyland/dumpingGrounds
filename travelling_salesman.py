@@ -130,45 +130,57 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias
 
     return bestRoute[0], bestRoute[1]
 
-def nextSteps(route, nodeList, screen):
+def nextSteps(route, nodeList, screen, best):
     routes = []
     for node in nodeList:
         if node in route:
             continue
         newRoute = route.copy()
+        newRoute[0] += newRoute[-1].distTo(node)
         newRoute.append(node)
-        screen.fill((0,0,0))
-        if len(route) > 1:
-            drawRoute(route, (255, 255, 255), False, screen)
+        if len(route) > 2:
+            line = route.copy()
+            line.remove(route[0])
+            screen.fill((0, 0, 0))
+            drawRoute(line, (200, 0, 0), False, screen)
+            drawScreen(nodeList, screen)
+            if len(best) > 2:
+                line = best.copy()
+                line.remove(line[0])
+                drawRoute(line, (0, 0, 255), False, screen)
             pygame.display.flip()
         routes.append(newRoute)
     return routes
 
 def bruteForce(nodeList, screen):
-    routes = [[nodeList[0]]]
-    while len(routes[0]) < len(nodeList):
+    routes = [[0, nodeList[0]]]
+    while len(routes[0])-1 < len(nodeList):
         remove = []
         add = []
+        current_smallest = [Infinity]
         for i in range(len(routes)):
-            newRoutes = nextSteps(routes[i], nodeList, screen)
+            newRoutes = nextSteps(routes[i], nodeList, screen, current_smallest)
             remove.append(routes[i])
             for route in newRoutes:
+                if route[0] < current_smallest[0]:
+                    current_smallest = route
+
                 add.append(route)
         for i in remove:
             routes.remove(i)
         for i in add:
             routes.append(i)
-    
-    shortest_route = [Infinity, None]
+
+    shortest_route = routes[0]
     for route in routes:
-        distance = 0
-        for n in range(len(route)-1):
-            distance += route[n].distTo(route[n+1])
-        if distance < shortest_route[0]:
-            shortest_route = [distance, route]
+        if route[0] < shortest_route[0]:
+            shortest_route = route
+
+    distance = shortest_route[0]
+    shortest_route.remove(shortest_route[0])
     
-    return shortest_route[1], shortest_route[0]
-        
+    return shortest_route, distance
+
 def selection(algorithm, nodes, screen):
     name = "Invalid Input"
     if algorithm == "G":
