@@ -192,13 +192,14 @@ def main():
     algorithm = input()
     print("Should the route draw instantly? Y | N")
     slow = input()
+    print("How many nodes should be used?")
+    numberOfNodes = int(input())
     root = Tk()
     resolution = [root.winfo_screenwidth(), root.winfo_screenheight()]
     screen = pygame.display.set_mode(resolution)
     pygame.display.set_caption("Travelling Salesman Problem")
 
-
-    nodes = generateNodes(9, 10, 2, resolution)
+    nodes = generateNodes(numberOfNodes, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     start_time = time.time()
