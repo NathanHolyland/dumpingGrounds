@@ -2,7 +2,6 @@ from math import *
 from random import randrange
 from re import A
 from tkinter import *
-from turtle import Screen
 from numpy import Infinity, euler_gamma
 import random
 import time
@@ -131,6 +130,45 @@ def antOptimise(nodeList, iterations, dstBias, pheromoneIntensity, pheromoneBias
 
     return bestRoute[0], bestRoute[1]
 
+def nextSteps(route, nodeList, screen):
+    routes = []
+    for node in nodeList:
+        if node in route:
+            continue
+        newRoute = route.copy()
+        newRoute.append(node)
+        screen.fill((0,0,0))
+        if len(route) > 1:
+            drawRoute(route, (255, 255, 255), False, screen)
+            pygame.display.flip()
+        routes.append(newRoute)
+    return routes
+
+def bruteForce(nodeList, screen):
+    routes = [[nodeList[0]]]
+    while len(routes[0]) < len(nodeList):
+        remove = []
+        add = []
+        for i in range(len(routes)):
+            newRoutes = nextSteps(routes[i], nodeList, screen)
+            remove.append(routes[i])
+            for route in newRoutes:
+                add.append(route)
+        for i in remove:
+            routes.remove(i)
+        for i in add:
+            routes.append(i)
+    
+    shortest_route = [Infinity, None]
+    for route in routes:
+        distance = 0
+        for n in range(len(route)-1):
+            distance += route[n].distTo(route[n+1])
+        if distance < shortest_route[0]:
+            shortest_route = [distance, route]
+    
+    return shortest_route[1], shortest_route[0]
+        
 def selection(algorithm, nodes, screen):
     name = "Invalid Input"
     if algorithm == "G":
@@ -142,10 +180,15 @@ def selection(algorithm, nodes, screen):
         # (Iterations, dstBias, pheromoneIntensity, pheromoneBias, decay, antsPerGroup)
         route, distance = antOptimise(nodes, 20, 3, 10000, 1, 0.7, 100, screen)
         return route, distance, name
+    if algorithm == "B":
+        name = "Brute Force"
+        route, distance = bruteForce(nodes, screen)
+        return route, distance, name
+        
             
             
 def main():
-    print("Which Algorithm Should Be Used \n G | Greedy Search \n A | Ant Optimise")
+    print("Which Algorithm Should Be Used \n G | Greedy Search \n A | Ant Optimise \n B | Brute Force")
     algorithm = input()
     print("Should the route draw instantly? Y | N")
     slow = input()
@@ -155,8 +198,7 @@ def main():
     pygame.display.set_caption("Travelling Salesman Problem")
 
 
-
-    nodes = generateNodes(100, 10, 2, resolution)
+    nodes = generateNodes(9, 10, 2, resolution)
     #antOptimise(nodes, 5)
 
     start_time = time.time()
@@ -187,4 +229,5 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
 main()
