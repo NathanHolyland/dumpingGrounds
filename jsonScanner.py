@@ -46,7 +46,6 @@ for i in dataDict:
     print(f"{i} {dataDict[i]}")
     print("\n")
 
-
 #    commit = input("Commit data to json file? Y|N ")
 #    if commit.lower() == "y":
 #        filename = input("enter appropriate file name: ")
