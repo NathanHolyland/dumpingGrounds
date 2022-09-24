@@ -70,10 +70,10 @@ def gaussian(M):
     inverse = np.identity(size)
     if not size:
         print("matrix is not square")
-        return
+        return None
     if np.linalg.det(M) == 0:
         print("matrix is not invertible")
-        return
+        return None
 
     # handle zeros in diag
     exclusions = []
