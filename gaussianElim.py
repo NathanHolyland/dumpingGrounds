@@ -22,7 +22,8 @@ def eliminate(matrix, inverse, size, r, c, exclusions):
     # if value was sourced from subtraction look elsewhere
     # if subtraction will result in elimination of diagonal look elsewhere
     print(f"exlcuded operations: {exclusions}")
-    if {r,c} in exclusions or matrix[r][r] == (matrix[c][r])*(matrix[r][c]/matrix[c][c]):
+    if [r,c] in exclusions or matrix[r][r] == (matrix[c][r])*(matrix[r][c]/matrix[c][c]):
+        resolved = False
         for i in range(size):
             # if the matrix contains nothing skip
             # if the new row is the same as the current row skip
@@ -32,10 +33,29 @@ def eliminate(matrix, inverse, size, r, c, exclusions):
                 continue
             if matrix[r][r] == matrix[c][i]*(matrix[r][c]/matrix[i][c]):
                 continue
+            resolved =  True
             print(f"R{r} - {matrix[r][c]}/{matrix[i][c]} * R{i} > R{r}")
             inverse[r] = rowSub(inverse, r, i, (matrix[r][c]/matrix[i][c]))
             matrix[r] = rowSub(matrix, r, i, (matrix[r][c]/matrix[i][c]))
             print(matrix)
+        if resolved:
+            return
+            
+        # find a row to add to the identity on current row (which wont increase [r][c] by the same ratio)
+        for i in range(size):
+            # if position contains nothing or is current position skip
+            if matrix[i][r] == 0 or i==r:
+                continue
+            # if the ratio will increase by the same factor with the row operation skip
+            if matrix[i][c]/matrix[r][c] == matrix[i][r]/matrix[r][r]:
+                continue
+
+            print(f"R{r} - R{i} > R{r}")
+            inverse[r] = rowSub(inverse, r, i)
+            matrix[r] = rowSub(matrix, r, i)
+            print(matrix)
+        # repeat elimination step
+        eliminate(matrix, inverse, size, r, c, exclusions)
         return
 
     print(f"R{r} - {matrix[r][c]}/{matrix[c][c]} * R{c} > R{r}")
@@ -66,7 +86,7 @@ def gaussian(M):
                 inverse[i] = rowSub(inverse, i, j, -1/matrix[j][i])
                 matrix[i] = rowSub(matrix, i, j, -1/matrix[j][i])
                 print(matrix)
-                exclusions.append({j,i})
+                exclusions.append([i,j])
                 break
 
     # bottom side elimination
@@ -84,8 +104,11 @@ def gaussian(M):
             eliminate(matrix, inverse, size, r, c, exclusions)
     
     for i in range(size):
+        print(f"R{i}/{matrix[i][i]} > R{i}")
         inverse[i] = inverse[i] / matrix[i][i]
         matrix[i] = matrix[i] / matrix[i][i]
+    
+    print(f"final:\n{matrix}")
     
     return inverse
 
@@ -99,5 +122,3 @@ def testCase():
         [16807, 2401, 343, 49, 7, 1]
     ],float)
     print(gaussian(M))
-
-testCase()

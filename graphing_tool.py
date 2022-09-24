@@ -1,58 +1,24 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from gaussianElim import *
 
-def generateRow(order, x):
-    row = []
-    for i in range(order, -1, -1):
-        row.append(x**i)
-    return row
+class Graph:
+    def __init__(self, x_values, y_values):
+        self.x_vals = x_values
+        self.y_vals = y_values
 
-def generatePolynomialMatrix(order, points):
-    matrix_list = []
-    result_vec = []
-    print(order)
-    for i in range(order+1):
-        matrix_list.append(generateRow(order, points[i][0]))
-        result_vec.append(points[i][1])
-    return np.array(matrix_list, float), np.array(result_vec, float)
+    def show(self):
+        plt.plot(self.x_vals, self.y_vals)
+        plt.show()
+    
+    def plotPoint(self, coords):
+        plt.plot(coords[0],coords[1],'go') 
 
-def userInput():
-    points = []
-    noPoints = int(input("no of points: "))
-    x_min = np.Infinity
-    x_max = -np.Infinity
-    for i in range(noPoints):
-        print(f"point {i}:")
-        newPoint_x = float(input("enter X: "))
-        newPoint_y = float(input("enter Y: "))
-        if newPoint_x < x_min:
-            x_min = newPoint_x
-        elif newPoint_x > x_max:
-            x_max = newPoint_x
-        print()
-        points.append(np.array([newPoint_x, newPoint_y]))
-    return points, x_min, x_max
-
-def PolyCoefficients(x, coeffs):
-    y = 0
-    for i in range(len(coeffs)):
-        y += coeffs[len(coeffs)-(i+1)]*x**i
-    return y
-
-points, x_min, x_max = userInput()
-print(f"points: {points}")
-print(f"min {x_min}, max {x_max}")
-matrix, results = generatePolynomialMatrix(len(points)-1, points)
-print(matrix)
-inverse = gaussian(matrix)
-print(f"{inverse} * {results}")
-params = np.matmul(inverse, results)
-print(f"calculated parameters:\n{params}")
-
-x = np.linspace(x_min,x_max,10000)
-
-# plot the function
-plt.plot(x, PolyCoefficients(x, params))
-plt.show()
+#coefficients from x^o to x^0
+class EqGraph(Graph):
+    def __init__(self, x_min, x_max, points, coeffs):
+        x_vals = np.linspace(x_min,x_max,points)
+        y_vals = 0
+        for i in range(len(coeffs)):
+            y_vals += coeffs[len(coeffs)-(i+1)]*x_vals**i
+        super().__init__(x_vals, y_vals)
 
