@@ -34,40 +34,25 @@ def userInput():
         points.append(np.array([newPoint_x, newPoint_y]))
     return points, x_min, x_max
 
+def PolyCoefficients(x, coeffs):
+    y = 0
+    for i in range(len(coeffs)):
+        y += coeffs[len(coeffs)-(i+1)]*x**i
+    return y
+
 points, x_min, x_max = userInput()
-x = np.linspace(-x_min,x_max,1000)
-print(x)
+print(f"points: {points}")
+print(f"min {x_min}, max {x_max}")
+matrix, results = generatePolynomialMatrix(len(points)-1, points)
+print(matrix)
+inverse = gaussian(matrix)
+print(f"{inverse} * {results}")
+params = np.matmul(inverse, results)
+print(f"calculated parameters:\n{params}")
 
-y = np.zeros(np.shape(x), float)
-for order in range(1, len(points)):
-    matrix, results = generatePolynomialMatrix(order, points)
-    print(results)
-    if np.linalg.det(matrix) == 0:
-        continue
-    inverse = gaussian(matrix)
-    params = results * inverse
-    print(params)
-    for i in range(len(params)):
-        print(params[i])
-        if i == len(params)-1:
-            y+=params[i]
-            break
-        y += params[i]*(x**(order-i))
-    break
-
-print(y)
-
-# setting the axes at the centre
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.spines['left'].set_position('center')
-ax.spines['bottom'].set_position('zero')
-ax.spines['right'].set_color('none')
-ax.spines['top'].set_color('none')
-ax.xaxis.set_ticks_position('bottom')
-ax.yaxis.set_ticks_position('left')
+x = np.linspace(x_min,x_max,10000)
 
 # plot the function
-plt.plot(x,y, 'r')
+plt.plot(x, PolyCoefficients(x, params))
 plt.show()
 
