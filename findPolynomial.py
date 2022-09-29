@@ -54,7 +54,7 @@ def findPolynomial():
     print(f"\n\n\n\n\npoints:\n{points}")
     print(f"\n\ncalculated parameters:\n{params}")
 
-    graph =  EqGraph(x_min, x_max, 10000, params)
+    graph =  EqGraph(x_min, x_max, 100000, params)
     for point in points:
         graph.plotPoint(point)
     graph.show()
