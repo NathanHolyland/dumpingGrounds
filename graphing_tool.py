@@ -17,6 +17,7 @@ class Graph:
 class EqGraph(Graph):
     def __init__(self, x_min, x_max, points, coeffs):
         x_vals = np.linspace(x_min,x_max,points)
+        print(x_vals)
         y_vals = 0
         for i in range(len(coeffs)):
             y_vals += coeffs[len(coeffs)-(i+1)]*x_vals**i

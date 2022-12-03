@@ -122,3 +122,5 @@ def testCase():
         [16807, 2401, 343, 49, 7, 1]
     ],float)
     print(gaussian(M))
+
+testCase()

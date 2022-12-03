@@ -1,6 +1,5 @@
 from gaussianElim import *
 from graphing_tool import EqGraph
-import random
 
 def generateRow(order, x):
     row = []
@@ -17,6 +16,20 @@ def generatePolynomialMatrix(order, points):
         result_vec.append(points[i][1])
     return np.array(matrix_list, float), np.array(result_vec, float)
 
+def randomPoints(n, x_min, x_max):
+    points = []
+    usedxVals = []
+    for i in range(n):
+        found = False
+        while not found:
+            newPoint_x = float(random.randrange(x_min, x_max))
+            if not newPoint_x in usedxVals:
+                found = True
+        usedxVals.append(newPoint_x)
+        newPoint_y = float(random.randrange(x_min, x_max))
+        points.append(np.array([newPoint_x, newPoint_y]))
+    return points
+
 def userInput():
     points = []
 
@@ -24,15 +37,16 @@ def userInput():
     rand = input("random? Y|N: ")
     x_min = np.Infinity
     x_max = -np.Infinity
+    if rand == "Y":
+        x_min = -20
+        x_max = 20
+        points = randomPoints(noPoints, x_min, x_max)
+        return points, x_min, x_max
     for i in range(noPoints):
-        if rand == "Y":
-            newPoint_x = float(random.randrange(-20, 20))
-            newPoint_y = float(random.randrange(-20, 20))
-        else:
-            print(f"point {i}:")
-            newPoint_x = float(input("enter X: "))
-            newPoint_y = float(input("enter Y: "))
-            print()
+        print(f"point {i}:")
+        newPoint_x = float(input("enter X: "))
+        newPoint_y = float(input("enter Y: "))
+        print()
         if newPoint_x < x_min:
             x_min = newPoint_x
         elif newPoint_x > x_max:
@@ -46,6 +60,7 @@ def findPolynomial():
 
     matrix, results = generatePolynomialMatrix(len(points)-1, points)
     inverse = gaussian(matrix)
+    
     if inverse is None:
         print(f"no solutions to:\n{matrix}")
         return
@@ -58,5 +73,4 @@ def findPolynomial():
     for point in points:
         graph.plotPoint(point)
     graph.show()
-
 findPolynomial()
