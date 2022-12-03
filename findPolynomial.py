@@ -1,4 +1,5 @@
 from gaussianElim import *
+import random
 from graphing_tool import EqGraph
 
 def generateRow(order, x):
