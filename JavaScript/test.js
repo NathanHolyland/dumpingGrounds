@@ -56,9 +56,21 @@ function printNumbers(n) {
   }
   
   function elimSpaces(str) {
+    let x = str.replaceAll(/ */g,"")
+    return x;
+  }
+  
+  function countVowels(str) {
     
   }
   
+  /*
   let x = [-1, 2, 5, -5];
   elimNegatives(x);
   console.log(x)
+  */
+  
+  /*
+  let x = "a a ahs aw yt asdh a "
+  console.log(elimSpaces(x));
+  */
